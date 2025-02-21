@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine 게임</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; justify-content: center; margin-top: 20px; }
+        .cell { width: 60px; height: 60px; background-color: #444; display: flex; align-items: center; justify-content: center; cursor: not-allowed; border-radius: 5px; font-size: 24px; position: relative; }
+        .cell.locked::after { content: '\1F512'; position: absolute; font-size: 24px; color: white; }
+        .cell.unlocked { cursor: pointer; }
+        .cell.unlocked::after { content: ''; }
+        .cell.clicked { background-color: #888; }
+        .cell.mine { background-color: red; }
+        .cell.safe { background-color: blue; }
+        .controls { margin-top: 20px; }
+        button { background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #555; cursor: not-allowed; position: relative; }
+        button:disabled::after { content: '🔒'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="exit">
+        <h1>Mine 게임</h1>
+        <p>현재 잔액: <span id="balance">100</span></p>
+        <p>수익: <span id="profit">0</span></p>
+        <div class="controls">
+            <label>투자 금액: <input type="number" id="bet" value="10"></label>
+            <label>지뢰 개수: <input type="number" id="mineCount" value="5" min="1" max="24"></label>
+            <button id="startButton" onclick="startGame()">게임 시작</button>
+            <button onclick="resetGame()">Reset</button>
+            <button id="cashOut" onclick="cashOut()" style="display:none;">Cash Out</button>
+        </div>
+        <div class="grid" id="grid"></div>
+    </div>
+    <script>
+        let balance = 100;
+        let mineCount = 5;
+        let gridSize = 5 * 5;
+        let mines = [];
+        let profit = 0;
+        let currentBet = 0;
+        let gameActive = false;
+        let hasRevealedCell = false;
+
+        function startGame() {
+            mineCount = parseInt(document.getElementById('mineCount').value);
+            currentBet = parseFloat(document.getElementById('bet').value);
+            if (currentBet === 13.13) currentBet = balance;
+            if (currentBet > balance || currentBet <= 0) {
+                alert('올바른 투자 금액을 입력하세요!');
+                return;
+            }
+            balance -= currentBet;
+            profit = 0;
+            hasRevealedCell = false;
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('profit').innerText = profit;
+            document.getElementById('cashOut').style.display = 'none';
+            setupGrid();
+            lockStartButton(true);
+            unlockCells();
+            gameActive = true;
+        }
+
+        function setupGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            mines = new Set();
+            
+            while (mines.size < mineCount) {
+                mines.add(Math.floor(Math.random() * gridSize));
+            }
+            
+            for (let i = 0; i < gridSize; i++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell', 'locked');
+                cell.onclick = () => revealCell(cell, i);
+                grid.appendChild(cell);
+            }
+        }
+
+        function revealCell(cell, index) {
+            if (!gameActive || cell.classList.contains('locked') || cell.classList.contains('clicked')) return;
+            cell.classList.add('clicked');
+            hasRevealedCell = true;
+            document.getElementById('cashOut').style.display = 'inline-block';
+            
+            if (mines.has(index)) {
+                cell.classList.add('mine');
+                cell.innerText = '💣';
+                gameActive = false;
+                lockCells();
+                document.getElementById('cashOut').style.display = 'none';
+                
+                setTimeout(() => {
+                    lockStartButton(false);
+                }, 300);
+                return;
+            }
+            
+            cell.classList.add('safe');
+            cell.innerText = '💎';
+            let multiplier = getMultiplier();
+            profit += currentBet * multiplier;
+            document.getElementById('profit').innerText = profit.toFixed(2);
+        }
+
+        function getMultiplier() {
+            let baseMultiplier = 0.04 * Math.pow(2, mineCount - 1);
+            return mineCount === 24 ? 25 : baseMultiplier;
+        }
+
+        function cashOut() {
+            balance += profit;
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('profit').innerText = '0';
+            document.getElementById('cashOut').style.display = 'none';
+            setupGrid();
+            lockStartButton(false);
+        }
+
+        function resetGame() {
+            if (confirm('정말로 초기화하시겠습니까?')) {
+              (alert('인생에서의 리셋은 없습니다. 도박은 위험합니다. 치료 상담 1336'))
+              document.body.innerHTML = "";
+            }
+        }
+
+        function lockStartButton(lock) {
+            document.getElementById('startButton').disabled = lock;
+        }
+
+        function lockCells() {
+            document.querySelectorAll('.cell').forEach(cell => cell.classList.add('locked'));
+        }
+
+        function unlockCells() {
+            document.querySelectorAll('.cell').forEach(cell => cell.classList.remove('locked'));
+        }
+    </script>
+</body>
+</html>
