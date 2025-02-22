@@ -43,19 +43,21 @@
         let profit = 0;
         let currentBet = 0;
         let gameActive = false;
-        let hasRevealedCell = false;
+        let multiplier = 0;
 
         function startGame() {
             mineCount = parseInt(document.getElementById('mineCount').value);
+            if (mineCount < 1 || mineCount > 24) {
+                alert('지뢰 개수는 1 이상 24 이하로 설정해야 합니다!');
+                return;
+            }
             currentBet = parseFloat(document.getElementById('bet').value);
-            if (currentBet === 13.13) currentBet = balance;
             if (currentBet > balance || currentBet <= 0) {
                 alert('올바른 투자 금액을 입력하세요!');
                 return;
             }
             balance -= currentBet;
             profit = 0;
-            hasRevealedCell = false;
             document.getElementById('balance').innerText = balance;
             document.getElementById('profit').innerText = profit;
             document.getElementById('cashOut').style.display = 'none';
@@ -63,17 +65,16 @@
             lockStartButton(true);
             unlockCells();
             gameActive = true;
+            multiplier = getInitialMultiplier();
         }
 
         function setupGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
             mines = new Set();
-            
             while (mines.size < mineCount) {
                 mines.add(Math.floor(Math.random() * gridSize));
             }
-            
             for (let i = 0; i < gridSize; i++) {
                 let cell = document.createElement('div');
                 cell.classList.add('cell', 'locked');
@@ -85,32 +86,25 @@
         function revealCell(cell, index) {
             if (!gameActive || cell.classList.contains('locked') || cell.classList.contains('clicked')) return;
             cell.classList.add('clicked');
-            hasRevealedCell = true;
             document.getElementById('cashOut').style.display = 'inline-block';
-            
             if (mines.has(index)) {
                 cell.classList.add('mine');
                 cell.innerText = '💣';
                 gameActive = false;
                 lockCells();
                 document.getElementById('cashOut').style.display = 'none';
-                
-                setTimeout(() => {
-                    lockStartButton(false);
-                }, 300);
+                lockStartButton(false);
                 return;
             }
-            
             cell.classList.add('safe');
             cell.innerText = '💎';
-            let multiplier = getMultiplier();
             profit += currentBet * multiplier;
             document.getElementById('profit').innerText = profit.toFixed(2);
+            multiplier *= 2;
         }
 
-        function getMultiplier() {
-            let baseMultiplier = 0.04 * Math.pow(2, mineCount - 1);
-            return mineCount === 24 ? 25 : baseMultiplier;
+        function getInitialMultiplier() {
+            return 0.0004 * Math.pow(2, mineCount - 1);
         }
 
         function cashOut() {
@@ -124,8 +118,8 @@
 
         function resetGame() {
             if (confirm('정말로 초기화하시겠습니까?')) {
-              (alert('인생에서의 리셋은 없습니다. 도박은 위험합니다. 치료 상담 1336'))
-              document.body.innerHTML = "";
+                alert('도박은 위험합니다. 치료 상담 1336');
+                window.close();
             }
         }
 
