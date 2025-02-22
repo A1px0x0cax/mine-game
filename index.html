@@ -119,7 +119,8 @@
         function resetGame() {
             if (confirm('정말로 초기화하시겠습니까?')) {
                 alert('도박은 위험합니다. 치료 상담 1336');
-                window.close();
+                localStorage.clear();
+                window.location.replace("about:blank");
             }
         }
 
