@@ -50,7 +50,7 @@
                             (e.ctrlKey && e.key === "U")
                         ) {
                             e.preventDefault();
-                            alert("개발자 도구 사용이 제한되었습니다.");
+                            alert("제발 그만해 이 띨빡이들아..");
                             return false;
                         }
                     };
@@ -59,7 +59,7 @@
                     document.addEventListener("contextmenu", function(event) {
                         event.preventDefault();
                         let menu = document.createElement("div");
-                        menu.innerText = "우클릭 메뉴 사용 가능 (검사는 불가)";
+                        menu.innerText = "우클릭만 열어놨다 시도조차 하지마라.";
                         menu.style.position = "absolute";
                         menu.style.top = `${event.clientY}px`;
                         menu.style.left = `${event.clientX}px`;
@@ -156,7 +156,7 @@
         }
 
         function cashOut() {
-            balance += profit;
+            balance += (profit + currentBet);
             document.getElementById('balance').innerText = balance.toFixed(2);
             document.getElementById('profit').innerText = '0';
             document.getElementById('cashOut').style.display = 'none';
