@@ -39,37 +39,50 @@
         <div class="grid" id="grid"></div>
     </div>
     <script>
-        (function() {
-            // 개발자 도구 차단
-            function disableDevTools() {
-                document.onkeydown = function(e) {
-                    if (
-                        e.key === "F12" || 
-                        (e.ctrlKey && e.shiftKey && e.key === "I") || 
-                        (e.ctrlKey && e.shiftKey && e.key === "C") || 
-                        (e.ctrlKey && e.shiftKey && e.key === "J") || 
-                        (e.ctrlKey && e.key === "U")
-                    ) {
-                        e.preventDefault();
-                        alert("적당히 해라 쫌ㅡㅡ 띨띨이들아");
-                        return false;
-                    }
-                };
+            (function() {
+                function disableDevTools() {
+                    document.onkeydown = function(e) {
+                        if (
+                            e.key === "F12" || 
+                            (e.ctrlKey && e.shiftKey && e.key === "I") || 
+                            (e.ctrlKey && e.shiftKey && e.key === "C") || 
+                            (e.ctrlKey && e.shiftKey && e.key === "J") || 
+                            (e.ctrlKey && e.key === "U")
+                        ) {
+                            e.preventDefault();
+                            alert("개발자 도구 사용이 제한되었습니다.");
+                            return false;
+                        }
+                    };
 
-                // 오른쪽 클릭 차단
-                document.addEventListener("contextmenu", function(e) {
-                    e.preventDefault();
-                    alert("그만해라.");
-                });
+                    // 우클릭 허용하되 '검사' 비활성화
+                    document.addEventListener("contextmenu", function(event) {
+                        event.preventDefault();
+                        let menu = document.createElement("div");
+                        menu.innerText = "우클릭 메뉴 사용 가능 (검사는 불가)";
+                        menu.style.position = "absolute";
+                        menu.style.top = `${event.clientY}px`;
+                        menu.style.left = `${event.clientX}px`;
+                        menu.style.background = "black";
+                        menu.style.color = "white";
+                        menu.style.padding = "10px";
+                        menu.style.borderRadius = "5px";
+                        menu.style.zIndex = "1000";
+                        document.body.appendChild(menu);
 
-                // 콘솔 조작 방지
-                console.log = function() {};
-                console.warn = function() {};
-                console.error = function() {};
-            }
+                        setTimeout(() => {
+                            menu.remove();
+                        }, 2000);
+                    });
 
-            disableDevTools();
-        })();
+                    // 콘솔 조작 방지
+                    console.log = function() {};
+                    console.warn = function() {};
+                    console.error = function() {};
+                }
+
+                disableDevTools();
+            })();
 
         let balance = 100;
         let mineCount = 5;
