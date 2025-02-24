@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -36,6 +39,38 @@
         <div class="grid" id="grid"></div>
     </div>
     <script>
+        (function() {
+            // 개발자 도구 차단
+            function disableDevTools() {
+                document.onkeydown = function(e) {
+                    if (
+                        e.key === "F12" || 
+                        (e.ctrlKey && e.shiftKey && e.key === "I") || 
+                        (e.ctrlKey && e.shiftKey && e.key === "C") || 
+                        (e.ctrlKey && e.shiftKey && e.key === "J") || 
+                        (e.ctrlKey && e.key === "U")
+                    ) {
+                        e.preventDefault();
+                        alert("적당히 해라 쫌ㅡㅡ 띨띨이들아");
+                        return false;
+                    }
+                };
+
+                // 오른쪽 클릭 차단
+                document.addEventListener("contextmenu", function(e) {
+                    e.preventDefault();
+                    alert("그만해라.");
+                });
+
+                // 콘솔 조작 방지
+                console.log = function() {};
+                console.warn = function() {};
+                console.error = function() {};
+            }
+
+            disableDevTools();
+        })();
+
         let balance = 100;
         let mineCount = 5;
         let gridSize = 5 * 5;
@@ -119,12 +154,10 @@
         function resetGame() {
             if (confirm('정말로 초기화하시겠습니까?')) {
                 alert('도박은 위험합니다. 치료 상담 1336');
-                window.close();
-                
-            } else {
-                alert('한번 리셋버튼 누른거 최소하고 나중에 후회하지 말고 그냥 영원히 잊고 살아라')
                 localStorage.clear();
                 window.location.replace("about:blank"); 
+            } else {
+                window.close();
             }
         }
 
